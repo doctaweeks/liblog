@@ -16,7 +16,9 @@ static inline void _console_log(const char *format, va_list args)
 	ret = vprintf(format, args);
 	if (ret < 0 && _syslog) {
 		syslog(LOG_NOTICE, "Unable to write to console (%d)", ret);
+		return;
 	}
+	putchar('\n');
 }
 
 
