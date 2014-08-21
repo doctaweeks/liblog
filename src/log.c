@@ -3,13 +3,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "logger.h"
+#include "liblog.h"
 
 static bool _syslog;
 static bool _console;
 
+static enum log_level max = LIBLOG_ERROR;
+
 __attribute__((__format__ (__printf__, 1, 0)))
-static void _console_log(const char *format, va_list args)
+static inline void _console_log(const char *format, va_list args)
 {
 	int ret;
 	ret = vprintf(format, args);
@@ -22,6 +24,9 @@ static void _console_log(const char *format, va_list args)
 __attribute__((__format__ (__printf__, 2, 0)))
 static void _logger(enum log_level level, const char *format, va_list args)
 {
+        if (level > max)
+		return;
+
 	if (_console) {
 		_console_log(format, args);
 	}
@@ -40,6 +45,11 @@ void log_open(const char *name, bool syslog, const char *file, bool console)
 	if (_syslog) {
 		openlog(name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
 	}
+}
+
+void log_level(enum log_level level)
+{
+	max = level;
 }
 
 void log_reopen(const char *name, bool syslog, const char *file, bool console)
@@ -72,7 +82,7 @@ void log_debug(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(AUDIOLOG_DEBUG, format, ap);
+	_logger(LIBLOG_DEBUG, format, ap);
 
 	va_end(ap);
 }
@@ -83,7 +93,7 @@ void log_info(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(AUDIOLOG_INFO, format, ap);
+	_logger(LIBLOG_INFO, format, ap);
 
 	va_end(ap);
 }
@@ -94,7 +104,7 @@ void log_warn(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(AUDIOLOG_WARN, format, ap);
+	_logger(LIBLOG_WARN, format, ap);
 
 	va_end(ap);
 }
@@ -105,7 +115,7 @@ void log_error(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(AUDIOLOG_ERROR, format, ap);
+	_logger(LIBLOG_ERROR, format, ap);
 
 	va_end(ap);
 }
