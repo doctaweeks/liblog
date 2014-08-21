@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include <syslog.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "liblog.h"
 

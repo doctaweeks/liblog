@@ -1,6 +1,8 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
+#include <stdbool.h>
+
 enum log_level {
 	LIBLOG_ERROR,
 	LIBLOG_WARN,
