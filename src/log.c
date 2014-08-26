@@ -6,35 +6,54 @@
 
 static bool _syslog;
 static bool _console;
+static FILE *_logfile = NULL;
 
 static enum log_level max = LIBLOG_ERROR;
 
-__attribute__((__format__ (__printf__, 1, 0)))
-static inline void _console_log(const char *format, va_list args)
+__attribute__((__format__ (__printf__, 2, 0)))
+static inline void _stream_log(FILE *stream, const char *format, va_list *pargs, bool copy)
 {
 	int ret;
-	ret = vprintf(format, args);
-	if (ret < 0 && _syslog) {
-		syslog(LOG_NOTICE, "Unable to write to console (%d)", ret);
-		return;
+
+	va_list wargs;
+
+	if (copy) {
+		va_copy(wargs, *pargs);
+		ret = vfprintf(stream, format, wargs);
+	} else {
+		ret = vfprintf(stream, format, *pargs);
 	}
-	putchar('\n');
+
+	if (ret < 0)
+		goto cleanup;
+	putc('\n', stream);
+
+cleanup:
+	if (copy)
+		va_end(wargs);
 }
 
-
 __attribute__((__format__ (__printf__, 2, 0)))
-static void _logger(enum log_level level, const char *format, va_list args)
+static void _logger(enum log_level level, const char *format, va_list *pargs)
 {
+	//va_list args = *pargs;
+
         if (level > max)
 		return;
 
+	int need = _syslog + _console + (_logfile != NULL);
+
 	if (_console) {
-		_console_log(format, args);
+		_stream_log(stdout, format, pargs, need > 1);
 	}
 
+	if (_logfile != NULL)
+	        _stream_log(_logfile, format, pargs, need > 1);
+
 	if (_syslog) {
-		vsyslog(LOG_NOTICE, format, args);
+		vsyslog(LOG_NOTICE, format, *pargs);
 	}
+
 }
 
 void log_open(const char *name, bool syslog, const char *file, bool console)
@@ -42,9 +61,13 @@ void log_open(const char *name, bool syslog, const char *file, bool console)
 	_syslog = syslog;
 	_console = console;
 
-	// TODO: file
-	if (_syslog) {
+	if (_syslog)
 		openlog(name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
+
+	if (file != NULL) {
+		_logfile = fopen(file, "a");
+		if (_logfile != NULL)
+			setvbuf(_logfile, NULL, _IOLBF, 0);
 	}
 }
 
@@ -61,9 +84,11 @@ void log_reopen(const char *name, bool syslog, const char *file, bool console)
 
 void log_close(void)
 {
-	if (_syslog) {
+	if (_syslog)
 		closelog();
-	}
+
+	if (_logfile != NULL)
+		fclose(_logfile);
 }
 
 /*__attribute__((__format__ (__printf__, 2, 3)))
@@ -83,7 +108,7 @@ void log_debug(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_DEBUG, format, ap);
+	_logger(LIBLOG_DEBUG, format, &ap);
 
 	va_end(ap);
 }
@@ -94,7 +119,7 @@ void log_info(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_INFO, format, ap);
+	_logger(LIBLOG_INFO, format, &ap);
 
 	va_end(ap);
 }
@@ -105,7 +130,7 @@ void log_warn(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_WARN, format, ap);
+	_logger(LIBLOG_WARN, format, &ap);
 
 	va_end(ap);
 }
@@ -116,7 +141,7 @@ void log_error(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_ERROR, format, ap);
+	_logger(LIBLOG_ERROR, format, &ap);
 
 	va_end(ap);
 }
