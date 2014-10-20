@@ -1,21 +1,36 @@
 #include <stdarg.h>
 #include <syslog.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "liblog.h"
 
 static bool _syslog;
 static bool _console;
 static FILE *_logfile = NULL;
+static bool _timestamp;
 
 static enum log_level max = LIBLOG_ERROR;
 
+static void _print_time(FILE *stream)
+{
+        time_t rawtime;
+        time(&rawtime);
+        struct tm *current_time = localtime (&rawtime);
+        char ts[16];
+        strftime(ts, 50, "%b %d %H:%M:%S", current_time);
+        fprintf(stream, "%s ", ts);
+}
+
 __attribute__((__format__ (__printf__, 2, 0)))
-static inline void _stream_log(FILE *stream, const char *format, va_list *pargs, bool copy)
+static void _stream_log(FILE *stream, const char *format, va_list *pargs, bool copy)
 {
 	int ret;
 
 	va_list wargs;
+
+	if (_timestamp)
+		_print_time(stream);
 
 	if (copy) {
 		va_copy(wargs, *pargs);
@@ -56,10 +71,11 @@ static void _logger(enum log_level level, const char *format, va_list *pargs)
 
 }
 
-void log_open(const char *name, bool syslog, const char *file, bool console)
+void log_open(const char *name, bool syslog, const char *file, bool console, bool timestamp)
 {
 	_syslog = syslog;
 	_console = console;
+	_timestamp = timestamp;
 
 	if (_syslog)
 		openlog(name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
@@ -76,10 +92,10 @@ void log_level(enum log_level level)
 	max = level;
 }
 
-void log_reopen(const char *name, bool syslog, const char *file, bool console)
+void log_reopen(const char *name, bool syslog, const char *file, bool console, bool timestamp)
 {
 	log_close();
-	log_open(name, syslog, file, console);
+	log_open(name, syslog, file, console, timestamp);
 }
 
 void log_close(void)
