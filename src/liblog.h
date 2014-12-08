@@ -3,10 +3,11 @@
 
 #include <stdbool.h>
 
-#define LIBLOG_FLAG_SYSLOG	1
-#define LIBLOG_FLAG_FILE	2
-#define LIBLOG_FLAG_CONSOLE	4
-#define LIBLOG_FLAG_TIMESTAMP	8
+#define LIBLOG_FLAG_SYSLOG		1
+#define LIBLOG_FLAG_FILE		2
+#define LIBLOG_FLAG_CONSOLE		4
+#define LIBLOG_FLAG_TIMESTAMP		8
+#define LIBLOG_FLAG_MICROTIMESTAMP	16
 
 enum log_level {
 	LIBLOG_ERROR,

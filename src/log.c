@@ -2,6 +2,7 @@
 #include <syslog.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "liblog.h"
 
@@ -14,11 +15,19 @@ static int _flags;
 
 static void _print_time(FILE *stream)
 {
+	struct timeval tv;
 	time_t rawtime;
-	time(&rawtime);
-	struct tm *current_time = localtime (&rawtime);
-	char ts[16];
-	strftime(ts, 50, "%b %d %H:%M:%S", current_time);
+	struct tm *current_time;
+	size_t len;
+
+	gettimeofday(&tv, NULL);
+	rawtime = tv.tv_sec;
+	current_time = localtime(&rawtime);
+
+	char ts[23];
+	len = strftime(ts, 50, "%b %d %H:%M:%S", current_time);
+	if (FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
+		sprintf(ts+len, ".%06ld", tv.tv_usec);
 	fprintf(stream, "%s ", ts);
 }
 
@@ -29,7 +38,7 @@ static void _stream_log(FILE *stream, const char *format, va_list *pargs, bool c
 
 	va_list wargs;
 
-	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP))
+	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP) || FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
 		_print_time(stream);
 
 	if (copy) {
