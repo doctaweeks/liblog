@@ -5,12 +5,12 @@
 
 #include "liblog.h"
 
-static bool _syslog;
-static bool _console;
 static FILE *_logfile = NULL;
-static bool _timestamp;
 
 static enum log_level max = LIBLOG_ERROR;
+
+static int _flags;
+#define FLAG_SET(x) ((_flags & x) == x)
 
 static void _print_time(FILE *stream)
 {
@@ -29,7 +29,7 @@ static void _stream_log(FILE *stream, const char *format, va_list *pargs, bool c
 
 	va_list wargs;
 
-	if (_timestamp)
+	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP))
 		_print_time(stream);
 
 	if (copy) {
@@ -56,28 +56,26 @@ static void _logger(enum log_level level, const char *format, va_list *pargs)
         if (level > max)
 		return;
 
-	int need = _syslog + _console + (_logfile != NULL);
+	int need = FLAG_SET(LIBLOG_FLAG_SYSLOG) + FLAG_SET(LIBLOG_FLAG_CONSOLE) + (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL);
 
-	if (_console) {
+	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
 		_stream_log(stdout, format, pargs, need > 1);
 	}
 
-	if (_logfile != NULL)
+	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
 	        _stream_log(_logfile, format, pargs, need > 1);
 
-	if (_syslog) {
+	if (FLAG_SET(LIBLOG_FLAG_SYSLOG)) {
 		vsyslog(LOG_NOTICE, format, *pargs);
 	}
 
 }
 
-void log_open(const char *name, bool syslog, const char *file, bool console, bool timestamp)
+void log_open(const char *name, const char *file, int flags)
 {
-	_syslog = syslog;
-	_console = console;
-	_timestamp = timestamp;
+	_flags = flags;
 
-	if (_syslog)
+	if (FLAG_SET(LIBLOG_FLAG_SYSLOG))
 		openlog(name, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_DAEMON);
 
 	if (file != NULL) {
@@ -92,15 +90,15 @@ void log_level(enum log_level level)
 	max = level;
 }
 
-void log_reopen(const char *name, bool syslog, const char *file, bool console, bool timestamp)
+void log_reopen(const char *name, const char *file, int flags)
 {
 	log_close();
-	log_open(name, syslog, file, console, timestamp);
+	log_open(name, file, flags);
 }
 
 void log_close(void)
 {
-	if (_syslog)
+	if (FLAG_SET(LIBLOG_FLAG_SYSLOG))
 		closelog();
 
 	if (_logfile != NULL)

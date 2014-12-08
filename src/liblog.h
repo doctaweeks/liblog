@@ -3,6 +3,11 @@
 
 #include <stdbool.h>
 
+#define LIBLOG_FLAG_SYSLOG	1
+#define LIBLOG_FLAG_FILE	2
+#define LIBLOG_FLAG_CONSOLE	4
+#define LIBLOG_FLAG_TIMESTAMP	8
+
 enum log_level {
 	LIBLOG_ERROR,
 	LIBLOG_WARN,
@@ -10,8 +15,8 @@ enum log_level {
 	LIBLOG_DEBUG
 };
 
-void log_open(const char *name, bool syslog, const char *file, bool console, bool timestamp);
-void log_reopen(const char *name, bool syslog, const char *file, bool console, bool timestamp);
+void log_open(const char *name, const char *file, int flags);
+void log_reopen(const char *name, const char *file, int flags);
 void log_close(void);
 
 void log_level(enum log_level level);
