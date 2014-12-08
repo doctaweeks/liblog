@@ -14,12 +14,12 @@ static int _flags;
 
 static void _print_time(FILE *stream)
 {
-        time_t rawtime;
-        time(&rawtime);
-        struct tm *current_time = localtime (&rawtime);
-        char ts[16];
-        strftime(ts, 50, "%b %d %H:%M:%S", current_time);
-        fprintf(stream, "%s ", ts);
+	time_t rawtime;
+	time(&rawtime);
+	struct tm *current_time = localtime (&rawtime);
+	char ts[16];
+	strftime(ts, 50, "%b %d %H:%M:%S", current_time);
+	fprintf(stream, "%s ", ts);
 }
 
 __attribute__((__format__ (__printf__, 2, 0)))
@@ -51,9 +51,7 @@ cleanup:
 __attribute__((__format__ (__printf__, 2, 0)))
 static void _logger(enum log_level level, const char *format, va_list *pargs)
 {
-	//va_list args = *pargs;
-
-        if (level > max)
+	if (level > max)
 		return;
 
 	int need = FLAG_SET(LIBLOG_FLAG_SYSLOG) + FLAG_SET(LIBLOG_FLAG_CONSOLE) + (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL);
@@ -68,7 +66,6 @@ static void _logger(enum log_level level, const char *format, va_list *pargs)
 	if (FLAG_SET(LIBLOG_FLAG_SYSLOG)) {
 		vsyslog(LOG_NOTICE, format, *pargs);
 	}
-
 }
 
 void log_open(const char *name, const char *file, int flags)
