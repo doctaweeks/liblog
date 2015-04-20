@@ -2,6 +2,7 @@
 #define _LOGGER_H_
 
 #include <stdbool.h>
+#include <stdarg.h>
 
 #define LIBLOG_FLAG_SYSLOG		1
 #define LIBLOG_FLAG_FILE		2
@@ -26,5 +27,10 @@ void log_error(const char *format, ...);
 void log_warn(const char *format, ...);
 void log_info(const char *format, ...);
 void log_debug(const char *format, ...);
+
+void log_verror(const char *format, va_list ap);
+void log_vwarn(const char *format, va_list ap);
+void log_vinfo(const char *format, va_list ap);
+void log_vdebug(const char *format, va_list ap);
 
 #endif

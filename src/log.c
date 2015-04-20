@@ -1,4 +1,3 @@
-#include <stdarg.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <time.h>
@@ -132,6 +131,11 @@ void log_debug(const char *format, ...)
 
 	va_end(ap);
 }
+__attribute__ ((format (printf, 1, 0)))
+void log_vdebug(const char *format, va_list ap)
+{
+	_logger(LIBLOG_DEBUG, format, ap);
+}
 
 __attribute__ ((format (printf, 1, 2)))
 void log_info(const char *format, ...)
@@ -142,6 +146,12 @@ void log_info(const char *format, ...)
 	_logger(LIBLOG_INFO, format, ap);
 
 	va_end(ap);
+}
+
+__attribute__ ((format (printf, 1, 0)))
+void log_vinfo(const char *format, va_list ap)
+{
+	_logger(LIBLOG_INFO, format, ap);
 }
 
 __attribute__ ((format (printf, 1, 2)))
@@ -155,6 +165,12 @@ void log_warn(const char *format, ...)
 	va_end(ap);
 }
 
+__attribute__ ((format (printf, 1, 0)))
+void log_vwarn(const char *format, va_list ap)
+{
+	_logger(LIBLOG_WARN, format, ap);
+}
+
 __attribute__ ((format (printf, 1, 2)))
 void log_error(const char *format, ...)
 {
@@ -164,4 +180,10 @@ void log_error(const char *format, ...)
 	_logger(LIBLOG_ERROR, format, ap);
 
 	va_end(ap);
+}
+
+__attribute__ ((format (printf, 1, 0)))
+void log_verror(const char *format, va_list ap)
+{
+	_logger(LIBLOG_ERROR, format, ap);
 }
