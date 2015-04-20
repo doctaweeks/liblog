@@ -32,7 +32,7 @@ static void _print_time(FILE *stream)
 }
 
 __attribute__((__format__ (__printf__, 2, 0)))
-static void _stream_log(FILE *stream, const char *format, va_list *pargs, bool copy)
+static void _stream_log(FILE *stream, const char *format, va_list pargs, bool copy)
 {
 	int ret;
 
@@ -42,10 +42,10 @@ static void _stream_log(FILE *stream, const char *format, va_list *pargs, bool c
 		_print_time(stream);
 
 	if (copy) {
-		va_copy(wargs, *pargs);
+		va_copy(wargs, pargs);
 		ret = vfprintf(stream, format, wargs);
 	} else {
-		ret = vfprintf(stream, format, *pargs);
+		ret = vfprintf(stream, format, pargs);
 	}
 
 	if (ret < 0)
@@ -58,7 +58,7 @@ cleanup:
 }
 
 __attribute__((__format__ (__printf__, 2, 0)))
-static void _logger(enum log_level level, const char *format, va_list *pargs)
+static void _logger(enum log_level level, const char *format, va_list pargs)
 {
 	if (level > max)
 		return;
@@ -73,7 +73,7 @@ static void _logger(enum log_level level, const char *format, va_list *pargs)
 	        _stream_log(_logfile, format, pargs, need > 1);
 
 	if (FLAG_SET(LIBLOG_FLAG_SYSLOG)) {
-		vsyslog(LOG_NOTICE, format, *pargs);
+		vsyslog(LOG_NOTICE, format, pargs);
 	}
 }
 
@@ -128,7 +128,7 @@ void log_debug(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_DEBUG, format, &ap);
+	_logger(LIBLOG_DEBUG, format, ap);
 
 	va_end(ap);
 }
@@ -139,7 +139,7 @@ void log_info(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_INFO, format, &ap);
+	_logger(LIBLOG_INFO, format, ap);
 
 	va_end(ap);
 }
@@ -150,7 +150,7 @@ void log_warn(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_WARN, format, &ap);
+	_logger(LIBLOG_WARN, format, ap);
 
 	va_end(ap);
 }
@@ -161,7 +161,7 @@ void log_error(const char *format, ...)
 	va_list ap;
 	va_start(ap, format);
 
-	_logger(LIBLOG_ERROR, format, &ap);
+	_logger(LIBLOG_ERROR, format, ap);
 
 	va_end(ap);
 }
