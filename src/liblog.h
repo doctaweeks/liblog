@@ -1,5 +1,5 @@
-#ifndef _LOGGER_H_
-#define _LOGGER_H_
+#ifndef LIBLOG_H_
+#define LIBLOG_H_
 
 #include <stdbool.h>
 #include <stdarg.h>
