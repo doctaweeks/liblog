@@ -24,7 +24,7 @@ static void _print_time(FILE *stream)
 	current_time = localtime(&rawtime);
 
 	char ts[23];
-	len = strftime(ts, 50, "%b %d %H:%M:%S", current_time);
+	len = strftime(ts, 23, "%b %d %H:%M:%S", current_time);
 	if (FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
 		sprintf(ts+len, ".%06ld", tv.tv_usec);
 	fprintf(stream, "%s ", ts);
