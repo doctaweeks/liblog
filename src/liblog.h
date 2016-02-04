@@ -17,8 +17,8 @@ enum log_level {
 	LIBLOG_DEBUG
 };
 
-void log_open(const char *name, const char *file, int flags);
-void log_reopen(const char *name, const char *file, int flags);
+void log_open(const char *restrict name, const char *restrict file, int flags);
+void log_reopen(const char *restrict name, const char *restrict file, int flags);
 void log_close(void);
 
 void log_level(enum log_level level);

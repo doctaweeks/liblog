@@ -76,7 +76,7 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 	}
 }
 
-void log_open(const char *name, const char *file, int flags)
+void log_open(const char *restrict name, const char *restrict file, int flags)
 {
 	_flags = flags;
 
@@ -95,7 +95,7 @@ void log_level(enum log_level level)
 	max = level;
 }
 
-void log_reopen(const char *name, const char *file, int flags)
+void log_reopen(const char *restrict name, const char *restrict file, int flags)
 {
 	log_close();
 	log_open(name, file, flags);
