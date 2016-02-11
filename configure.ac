@@ -9,4 +9,4 @@ LT_INIT
 AC_C_RESTRICT
 AC_PROG_CC_C99
 
-AC_OUTPUT([Makefile])
+AC_OUTPUT([Makefile src/liblog.pc])

@@ -17,3 +17,4 @@ libtool
 *.o
 ltmain.sh
 missing
+liblog.pc
