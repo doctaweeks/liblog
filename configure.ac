@@ -1,4 +1,4 @@
-AC_INIT([liblog], [1.0])
+AC_INIT([liblog], [0.1.2])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_MACRO_DIRS([m4])
 
