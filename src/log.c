@@ -64,9 +64,8 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 
 	int need = FLAG_SET(LIBLOG_FLAG_SYSLOG) + FLAG_SET(LIBLOG_FLAG_CONSOLE) + (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL);
 
-	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
+	if (FLAG_SET(LIBLOG_FLAG_CONSOLE))
 		_stream_log(stdout, format, pargs, need > 1);
-	}
 
 	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
 	        _stream_log(_logfile, format, pargs, need > 1);
