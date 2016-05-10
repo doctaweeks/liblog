@@ -12,7 +12,9 @@ static enum log_level max = LIBLOG_ERROR;
 static int _flags;
 #define FLAG_SET(x) ((_flags & x) == x)
 
-static void _print_time(FILE *stream)
+static char ts[23];
+
+static void _get_time()
 {
 	struct timeval tv;
 	time_t rawtime;
@@ -23,11 +25,9 @@ static void _print_time(FILE *stream)
 	rawtime = tv.tv_sec;
 	current_time = localtime(&rawtime);
 
-	char ts[23];
 	len = strftime(ts, 23, "%b %d %H:%M:%S", current_time);
 	if (FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
 		sprintf(ts+len, ".%06ld", tv.tv_usec);
-	fprintf(stream, "%s ", ts);
 }
 
 __attribute__((__format__ (__printf__, 2, 0)))
@@ -38,7 +38,7 @@ static void _stream_log(FILE *stream, const char *format, va_list pargs, bool co
 	va_list wargs;
 
 	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP) || FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
-		_print_time(stream);
+		fprintf(stream, "%s ", ts);
 
 	if (copy) {
 		va_copy(wargs, pargs);
@@ -64,9 +64,11 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 
 	int need = FLAG_SET(LIBLOG_FLAG_SYSLOG) + FLAG_SET(LIBLOG_FLAG_CONSOLE) + (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL);
 
-	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
+	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP) || FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
+		_get_time();
+
+	if (FLAG_SET(LIBLOG_FLAG_CONSOLE))
 		_stream_log(stdout, format, pargs, need > 1);
-	}
 
 	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
 	        _stream_log(_logfile, format, pargs, need > 1);
