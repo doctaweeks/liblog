@@ -68,11 +68,16 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 		_get_time();
 
 	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
+	  #ifdef LOG_STDERR
 		if (level == LIBLOG_ERROR) {
 			_stream_log(stderr, format, pargs, need > 1);
 		} else {
 			_stream_log(stdout, format, pargs, need > 1);
 		}
+		#endif
+		#ifndef LOG_STDERR
+		_stream_log(stdout, format, pargs, need > 1);
+		#endif
 	}
 
 	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
