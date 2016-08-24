@@ -9,9 +9,4 @@ LT_INIT
 AC_C_RESTRICT
 AC_PROG_CC_C99
 
-AC_ARG_ENABLE([log-stderr],
-              [AS_HELP_STRING([--disable-log-stderr], [Disable logging errors to stderr])],
-              [],
-              [AC_DEFINE([LOG_STDERR], [1])])
-
 AC_OUTPUT([Makefile src/liblog.pc])
