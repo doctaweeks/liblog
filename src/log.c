@@ -59,6 +59,8 @@ cleanup:
 __attribute__((__format__ (__printf__, 2, 0)))
 static void _logger(enum log_level level, const char *format, va_list pargs)
 {
+	FILE *stream = stdout;
+
 	if (level > max)
 		return;
 
@@ -67,8 +69,11 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP) || FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
 		_get_time();
 
-	if (FLAG_SET(LIBLOG_FLAG_CONSOLE))
-		_stream_log(stdout, format, pargs, need > 1);
+	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
+		if (level == LIBLOG_ERROR && FLAG_SET(LIBLOG_FLAG_ERROR_TO_STDERR))
+			stream = stderr;
+		_stream_log(stream, format, pargs, need > 1);
+	}
 
 	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
 	        _stream_log(_logfile, format, pargs, need > 1);
