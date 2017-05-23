@@ -12,6 +12,13 @@ static enum log_level max = LIBLOG_ERROR;
 static int _flags;
 #define FLAG_SET(x) ((_flags & x) == x)
 
+static const char *log_level_desc[] = {
+	"ERROR",
+	"WARN ",
+	"INFO ",
+	"DEBUG"
+};
+
 static char ts[23];
 
 static void _get_time()
@@ -31,7 +38,7 @@ static void _get_time()
 }
 
 __attribute__((__format__ (__printf__, 2, 0)))
-static void _stream_log(FILE *stream, const char *format, va_list pargs, bool copy)
+static void _stream_log(FILE *stream, const char *format, va_list pargs, bool copy, enum log_level level)
 {
 	int ret;
 
@@ -39,6 +46,9 @@ static void _stream_log(FILE *stream, const char *format, va_list pargs, bool co
 
 	if (FLAG_SET(LIBLOG_FLAG_TIMESTAMP) || FLAG_SET(LIBLOG_FLAG_MICROTIMESTAMP))
 		fprintf(stream, "%s ", ts);
+
+	if (FLAG_SET(LIBLOG_LEVEL_PREFIX))
+		fprintf(stream, "%s ", log_level_desc[level]);
 
 	if (copy) {
 		va_copy(wargs, pargs);
@@ -72,11 +82,11 @@ static void _logger(enum log_level level, const char *format, va_list pargs)
 	if (FLAG_SET(LIBLOG_FLAG_CONSOLE)) {
 		if (level == LIBLOG_ERROR && FLAG_SET(LIBLOG_FLAG_ERROR_TO_STDERR))
 			stream = stderr;
-		_stream_log(stream, format, pargs, need > 1);
+		_stream_log(stream, format, pargs, need > 1, level);
 	}
 
 	if (FLAG_SET(LIBLOG_FLAG_FILE) && _logfile != NULL)
-		_stream_log(_logfile, format, pargs, need > 1);
+		_stream_log(_logfile, format, pargs, need > 1, level);
 
 	if (FLAG_SET(LIBLOG_FLAG_SYSLOG)) {
 		vsyslog(LOG_NOTICE, format, pargs);
