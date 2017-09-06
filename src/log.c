@@ -21,7 +21,7 @@ static const char *log_level_desc[] = {
 
 static char ts[23];
 
-static void _get_time()
+static void _get_time(void)
 {
 	struct timeval tv;
 	time_t rawtime;
